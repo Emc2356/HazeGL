@@ -1,0 +1,8 @@
+.vscode/
+**/Makefile
+**/build
+libraries/
+**/*.o
+**/*.exe
+
+MakeMake.py

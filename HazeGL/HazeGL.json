@@ -1,0 +1,53 @@
+{
+    "globals": {
+        "STAGE": "debug",
+        "INCLUDE-DIR": "$(HZ-ROOT)include/",
+        "SRC-DIR": "$(HZ-ROOT)src/"
+    },
+    "settings": {
+        "src-c-dir": "$(SRC-DIR)c/",
+        "src-cpp-dir": "$(SRC-DIR)",
+        "out-type": "archive"
+    },
+    "archive": {
+        "name": "$(libraries-dir)HazeGL"
+    },
+    "cxx": {
+        "standard": "17",
+        "compiler": "g++",
+
+        "release-flags": "-O3 -g0",
+        "debug-flags": "-DDEBUG -D_DEBUG=1 -g3 -Og",
+        
+        "build-dir": "$(HZ-ROOT)build/",
+
+        "flags": [
+            "-Wall",
+            "-Werror",
+            "-Wextra",
+            "-pedantic",
+            "$(cxx.$(STAGE)-flags)"
+        ]
+    },
+    "include-dirs": [
+        "$(INCLUDE-DIR)",
+        "$(INCLUDE-DIR)glad",
+        "$(DEPENDENCIES-DIR)/glm"
+    ],
+    "source-files": [
+        "$(SRC-DIR)c/glad.c",
+        "$(SRC-DIR)c/stb_image.c",
+        "$(SRC-DIR)internal.Shader.cpp",
+        "$(SRC-DIR)Window.cpp",
+        "$(SRC-DIR)Shader.cpp",
+        "$(SRC-DIR)ComputeShader.cpp",
+        "$(SRC-DIR)VertexBuffer.cpp",
+        "$(SRC-DIR)IndexBuffer.cpp",
+        "$(SRC-DIR)VertexArray.cpp",
+        "$(SRC-DIR)Renderer.cpp",
+        "$(SRC-DIR)Texture2D.cpp"
+    ],
+    "directories-to-create": [
+        "$(cxx.build-dir)"
+    ]
+}

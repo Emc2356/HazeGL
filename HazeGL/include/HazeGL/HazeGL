@@ -1,0 +1,15 @@
+#pragma once
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include "HazeGL/IndexBuffer.hpp"
+#include "HazeGL/Renderer.hpp"
+#include "HazeGL/Shader.hpp"
+#include "HazeGL/ComputeShader.hpp"
+#include "HazeGL/Texture2D.hpp"
+#include "HazeGL/Timer.hpp"
+#include "HazeGL/VertexArray.hpp"
+#include "HazeGL/VertexBuffer.hpp"
+#include "HazeGL/Window.hpp"
+#include "HazeGL/ShaderStorageBufferObject.hpp"
