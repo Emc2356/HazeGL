@@ -77,7 +77,7 @@ int main(void) {
     HazeGL::Shader shader(readFile("./src/glsl/main.vert"), readFile("./src/glsl/main.frag"));
     HazeGL::ComputeShader computeShader(readFile("./src/glsl/main.comp"));
 
-    HazeGL::Texture2D texture(512, 512, nullptr);
+    HazeGL::Texture2D texture(512MakeMake, 512MakeMake, nullptr);
 
     std::vector<glm::vec3> some_data = {
         glm::vec3(0.5f, 1.5f, 5.0f)
