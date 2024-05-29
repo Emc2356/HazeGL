@@ -1,0 +1,65 @@
+{
+    "globals": {
+        "STAGE": "debug",
+        "ROOT": "./",
+        "LOCAL-ROOT": "$(ROOT)examples/MandelbrotSet/",
+        "INCLUDE-DIR": "$(LOCAL-ROOT)include/",
+        "SRC-DIR": "$(LOCAL-ROOT)src/",
+        "DEPENDENCIES-DIR": "$(ROOT)Dependencies/"
+    },
+    "settings": {
+        "src-c-dir": "$(SRC-DIR)c/",
+        "src-cpp-dir": "$(SRC-DIR)",
+        "libraries-dir": "$(ROOT)libraries/",
+        "out-type": "executable"
+    },
+    "executable": {
+        "name": "mandelbrot.o"
+    },
+    "cxx": {
+        "standard": "17",
+        "compiler": "g++",
+
+        "release-flags": "-O3 -g0",
+        "debug-flags": "-DDEBUG -D_DEBUG=1 -g3 -Og",
+        
+        "build-dir": "$(ROOT)build/",
+
+        "flags": [
+            "-Wall",
+            "-Werror",
+            "-Wextra",
+            "-pedantic",
+            "$(cxx.$(STAGE)-flags)"
+        ]
+    },
+    "include-dirs": [
+        "$(INCLUDE-DIR)",
+        "$(DEPENDENCIES-DIR)/glm",
+        "HazeGL/include/",
+        "HazeGL/include/glad/"
+    ],
+    "libraries": [
+        "GL",
+        "glfw"
+    ],
+    "library-dirs": [
+        "$(settings.libraries-dir)"
+    ],
+    "source-files": [
+        "$(SRC-DIR)main.cpp"
+    ],
+    "dependencies": {
+        "HazeGL/HazeGL.json": {
+            "globals": {
+                "HZ-ROOT": "$(ROOT)HazeGL/",
+                "libraries-dir": "./$(settings.libraries-dir)",
+                "DEPENDENCIES-DIR": "$(DEPENDENCIES-DIR)"
+            }
+        }
+    },
+    "directories-to-create": [
+        "$(cxx.build-dir)",
+        "$(settings.libraries-dir)"
+    ]
+}

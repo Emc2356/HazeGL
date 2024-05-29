@@ -1,6 +1,10 @@
 #include "HazeGL/Window.hpp"
+#include "HazeGL/Mouse.hpp"
 
 #include <stdexcept>
+#include <iostream>
+#include <sstream>
+
 
 void APIENTRY HZ_GLDebugMessageCallback(GLenum source, GLenum type, GLuint id,
                               GLenum severity, GLsizei length,
@@ -93,6 +97,15 @@ HazeGL::Window::Window(uint32_t width, uint32_t height, std::string title) {
     mHeight = height;
     mTitle = title;
     mDebug = false;
+    mMouse = nullptr;
+    mPointers = {};
+}
+
+HazeGL::Window::~Window() {
+    if (mMouse!= nullptr) {
+        delete mMouse;
+    }
+    glfwTerminate();
 }
 
 void HazeGL::Window::setDebug(bool debug) {
@@ -115,13 +128,59 @@ GLFWwindow* HazeGL::Window::getWindow() const {
     return mWindow;
 }
 
-void HazeGL::Window::enableBlending () {
+void HazeGL::Window::setTitle(const std::string& title) {
+    mTitle = title;
+}
+
+void HazeGL::Window::displayMsPerFrame(bool updateOnlyVariables) {
+    static double lastTime;
+    static uint32_t nbFrames = 0;
+
+    if (updateOnlyVariables) {
+        nbFrames++;
+        return;
+    }
+
+    double currentTime = glfwGetTime();
+    double delta = currentTime - lastTime;
+    if (delta >= 0.5) { // If last cout was more than 0.5 sec ago
+        std::stringstream result;
+
+        result << mTitle << " [" << 1000.0/double(nbFrames) << " ms]";
+        
+        glfwSetWindowTitle(mWindow, result.str().c_str());
+
+        nbFrames = 0;
+        lastTime = currentTime;
+    }
+}
+
+void HazeGL::Window::updateTitle(bool showMsPerFrame/*=true*/, uint32_t msPerUpdate/*=1000*/) {
+    static double lastTime;
+    
+    double currentTime = glfwGetTime();
+    double delta = currentTime - lastTime;
+
+    if (delta >= float(msPerUpdate) / 1000.0) {
+        if (showMsPerFrame) {
+            displayMsPerFrame(false);
+        } else {
+            glfwSetWindowTitle(mWindow, mTitle.c_str());
+        }
+
+        lastTime = currentTime;
+    } else {
+        displayMsPerFrame(true);
+    }
+}
+
+void HazeGL::Window::enableBlending() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-bool HazeGL::Window::shouldClose() const {
-    return glfwWindowShouldClose(mWindow);
+bool HazeGL::Window::isOpen() const {
+    return !glfwWindowShouldClose(mWindow);
 }
 
 void HazeGL::Window::swapBuffers() const {
@@ -157,6 +216,7 @@ void HazeGL::Window::initializeWindow() {
         glfwTerminate();
         throw std::runtime_error("Failed to create GLFW window");
     }
+    glfwSetWindowUserPointer(mWindow, (void*)this);
 }
 
 void HazeGL::Window::createGLContext() {
@@ -169,21 +229,107 @@ void HazeGL::Window::initializeGLAD() {
     }
 }
 
-
-void HazeGL::Window::getMousePosition(float* x, float* y) {
-    double xpos, ypos;
-    glfwGetCursorPos(mWindow, &xpos, &ypos);
-    *x = (float)xpos;
-    *y = (float)ypos;
+HazeGL::Mouse* HazeGL::Window::getMouse() {
+    if (mMouse == nullptr) {
+        mMouse = new Mouse(this);
+    }
+    return mMouse;
 }
 
-void HazeGL::Window::getMousePosition(double* x, double* y) {
-    glfwGetCursorPos(mWindow, x, y);
+
+void HazeGL::Window::setWindowPosCallback(GLFWwindowposfun proc, void* pointer/*=nullptr*/) {
+    glfwSetWindowPosCallback(mWindow, proc);
+    if (pointer != nullptr) {
+        mPointers.windowPosCallbackPointer = pointer;
+    }
 }
 
-void HazeGL::Window::getMousePosition(uint32_t* x, uint32_t* y) {
-    double xpos, ypos;
-    glfwGetCursorPos(mWindow, &xpos, &ypos);
-    *x = (uint32_t)xpos;
-    *y = (uint32_t)ypos;
+void HazeGL::Window::setWindowResizeCallback(GLFWwindowsizefun proc, void* pointer/*=nullptr*/) {
+    glfwSetWindowSizeCallback(mWindow, proc);
+    if (pointer != nullptr) {
+        mPointers.windowResizeCallbackPointer = pointer;
+    }
 }
+
+void HazeGL::Window::setWindowCloseCallback(GLFWwindowclosefun proc, void* pointer/*=nullptr*/) {
+    glfwSetWindowCloseCallback(mWindow, proc);
+    if (pointer != nullptr) {
+        mPointers.windowCloseCallbackPointer = pointer;
+    }
+}
+
+void HazeGL::Window::setWindowFocusCallback(GLFWwindowfocusfun proc, void* pointer/*=nullptr*/) {
+    glfwSetWindowFocusCallback(mWindow, proc);
+    if (pointer != nullptr) {
+        mPointers.windowFocusCallbackPointer = pointer;
+    }
+}
+
+void HazeGL::Window::setWindowMaximizeCallback(GLFWwindowmaximizefun proc, void* pointer/*=nullptr*/) {
+    glfwSetWindowMaximizeCallback(mWindow, proc);
+    if (pointer != nullptr) {
+        mPointers.windowMaximizeCallbackPointer = pointer;
+    }
+}
+
+void HazeGL::Window::setFrameBufferResizeCallback(GLFWframebuffersizefun proc, void* pointer/*=nullptr*/) {
+    glfwSetFramebufferSizeCallback(mWindow, proc);
+    if (pointer != nullptr) {
+        mPointers.frameBufferResizeCallbackPointer = pointer;
+    }
+}
+
+void HazeGL::Window::setKeyCallback(GLFWkeyfun proc, void* pointer/*=nullptr*/) {
+    glfwSetKeyCallback(mWindow, proc);
+    if (pointer != nullptr) {
+        mPointers.keyCallbackPointer = pointer;
+    }
+}
+
+void HazeGL::Window::setMouseButtonCallback(GLFWmousebuttonfun proc, void* pointer/*=nullptr*/) {
+    glfwSetMouseButtonCallback(mWindow, proc);
+    if (pointer != nullptr) {
+        mPointers.mouseButtonCallbackPointer = pointer;
+    }
+}
+
+void HazeGL::Window::setCursorPosCallback(GLFWcursorposfun proc, void* pointer/*=nullptr*/) {
+    glfwSetCursorPosCallback(mWindow, proc);
+    if (pointer != nullptr) {
+        mPointers.cursorPosCallbackPointer = pointer;
+    }
+}
+
+void HazeGL::Window::setCursorEnterCallback(GLFWcursorenterfun proc, void* pointer/*=nullptr*/) {
+    glfwSetCursorEnterCallback(mWindow, proc);
+    if (pointer != nullptr) {
+        mPointers.cursorEnterCallbackPointer = pointer;
+    }
+}
+
+void HazeGL::Window::setScrollCallback(GLFWscrollfun proc, void* pointer/*=nullptr*/) {
+    glfwSetScrollCallback(mWindow, proc);
+    if (pointer != nullptr) {
+        mPointers.scrollCallbackPointer = pointer;
+    }
+}
+
+void HazeGL::Window::setDropCallback(GLFWdropfun proc, void* pointer/*=nullptr*/) {
+    glfwSetDropCallback(mWindow, proc);
+    if (pointer != nullptr) {
+        mPointers.dropCallbackPointer = pointer;
+    }
+}
+
+void* HazeGL::Window::getWindowPosCallbackPointer() const { return mPointers.windowPosCallbackPointer; }
+void* HazeGL::Window::getWindowResizeCallbackPointer() const { return mPointers.windowResizeCallbackPointer; }
+void* HazeGL::Window::getWindowCloseCallbackPointer() const { return mPointers.windowCloseCallbackPointer; }
+void* HazeGL::Window::getWindowFocusCallbackPointer() const { return mPointers.windowFocusCallbackPointer; }
+void* HazeGL::Window::getWindowMaximizeCallbackPointer() const { return mPointers.windowMaximizeCallbackPointer; }
+void* HazeGL::Window::getFrameBufferResizeCallbackPointer() const { return mPointers.frameBufferResizeCallbackPointer; }
+void* HazeGL::Window::getKeyCallbackPointer() const { return mPointers.keyCallbackPointer; }
+void* HazeGL::Window::getMouseButtonCallbackPointer() const { return mPointers.mouseButtonCallbackPointer; }
+void* HazeGL::Window::getCursorPosCallbackPointer() const { return mPointers.cursorPosCallbackPointer; }
+void* HazeGL::Window::getCursorEnterCallbackPointer() const { return mPointers.cursorEnterCallbackPointer; }
+void* HazeGL::Window::getScrollCallbackPointer() const { return mPointers.scrollCallbackPointer; }
+void* HazeGL::Window::getDropCallbackPointer() const { return mPointers.dropCallbackPointer; }

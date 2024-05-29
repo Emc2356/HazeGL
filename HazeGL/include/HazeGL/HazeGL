@@ -13,3 +13,4 @@
 #include "HazeGL/VertexBuffer.hpp"
 #include "HazeGL/Window.hpp"
 #include "HazeGL/ShaderStorageBufferObject.hpp"
+#include "HazeGL/Mouse.hpp"

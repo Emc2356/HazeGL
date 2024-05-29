@@ -39,6 +39,7 @@
         "$(SRC-DIR)c/stb_image.c",
         "$(SRC-DIR)internal.Shader.cpp",
         "$(SRC-DIR)Window.cpp",
+        "$(SRC-DIR)Mouse.cpp",
         "$(SRC-DIR)Shader.cpp",
         "$(SRC-DIR)ComputeShader.cpp",
         "$(SRC-DIR)VertexBuffer.cpp",
